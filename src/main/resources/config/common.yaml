@@ -1,0 +1,23 @@
+
+# object store configurations
+#entry ttl unit is in MINUTES
+ entryttl: "15" 
+ 
+# Response Timeout
+ response:
+  timeout: "180000"
+
+ # Reconnection strategy
+ reconnect:
+    frequency: "3000"
+    count: "3"  
+ 
+#geoapify api configuration 
+ geoapify:
+   host:  "api.geoapify.com"
+   path:  "/v1/geocode/search"
+# OpenWeather Api configuration
+ OpenWeather:
+     host: "api.openweathermap.org"
+     path: "/data/2.5/weather"
+     

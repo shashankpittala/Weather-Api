@@ -1,0 +1,8 @@
+ #geoapify api key   key: openweatherapike    value : "ea086ca3a18044b7b7ec0036e8a8c8f0"
+ geoapify:
+    apikey: "![0TwbwnECHdz82mTQHj75H0YXrZo7U2UOeEdB5T/u6/XWttqU8iauxmsJ9DeodN/w]"
+    
+# openweather api    key: openweatherapike    value : "08c70a83bda30e056bd34e8d8a2e7475"
+ openweather:
+     appid: "![HYiTscAhPq8LRpBJhaeizuKQgyz2a1vdJM/Ipm2ImAoFFGHmrzW0i9YN/HBxFid2]"
+   

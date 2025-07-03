@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+   
+   
+    <!-- Object Store -->
+	<flow name="weather-apiFlow1" doc:id="7b628aae-85cd-4cbb-b709-c78737e4d0a0" >
+		<http:listener doc:name="Listener" doc:id="1c1d4820-f5ff-4373-8e04-373540669f46" path="/weatherdetails" config-ref="HTTP_Listener_config"/>
+		<set-variable value="#[output appplication/json&#10;---&#10;lower(attributes.queryParams.city)]" doc:name=" Ctiy Name as  Variable" doc:id="659e3741-4398-4d7d-af17-59abc2ffba2f" variableName="city"/>
+		<os:retrieve doc:name="Retrieve City Weather Data" doc:id="e353c0d3-8c64-4c34-9c9f-46dd01df6dff" key="#[vars.city]" target="weatherResponse" objectStore="City_current_weather_data_Object_store">
+			<os:default-value ><![CDATA[#[{
+	"weatherDetails":null
+}]]]></os:default-value>
+		</os:retrieve>
+		<choice doc:name="Choice" doc:id="f288727f-9873-4786-83cc-917dd44cc9a1" >
+			<when expression="#[vars.weatherResponse.weatherDetails !=null]">
+				<ee:transform doc:name="Weather Data Response" doc:id="f4c90eeb-a1e7-4387-aff0-4c8a7d00ff0d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.weatherResponse]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<http:request method="GET" doc:name="Request to GeoApify APi" doc:id="0c44f398-389c-4d49-a8be-528e7d138e07" config-ref="geoapify_Request_Configuration" path="${geoapify.path}" responseTimeout="${response.timeout}">
+					<reconnect frequency="${reconnect.frequency}" count="${reconnect.count}" />
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"text" : vars.city,
+	"apiKey": p('secure::geoapify.apikey')
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="Mapping Lat And Lon" doc:id="d2f2a6a9-8fb0-42b4-9d6e-5fa5e8da3dca" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"lat": payload.features.properties.lat reduce ((item) -> item),
+	"lon": payload.features.properties.lon reduce ((item) -> item)
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="latlonValues" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"lat": payload.features.properties.lat reduce ((item) -> item),
+	"lon": payload.features.properties.lon reduce ((item) -> item)
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<http:request method="GET" doc:name="Request To OpenWeather Api" doc:id="430fbd41-d5d9-4e5e-b5c9-19a8a8978963" config-ref="OpenWeatherApi_Request_Configuration" path="${OpenWeather.path}" responseTimeout="${response.timeout}">
+					<reconnect frequency="${reconnect.frequency}" count="${reconnect.count}" />
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"lat" : payload.lat,
+	"lon" : payload.lon,
+	"appid": p('secure::openweather.appid')
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="mapping for weather Data Response" doc:id="e7e72db5-e8f7-4f0f-b9e7-6f6fc497ea62" >
+					<ee:message >
+						<ee:set-payload resource="dwl/openweather_api_Response_Transformation.dwl" />
+					</ee:message>
+					<ee:variables >
+					</ee:variables>
+				</ee:transform>
+				<os:store doc:name="Store  city  weather Data" doc:id="0f91329d-df61-46d5-b82b-9bcb617b95c3" key="#[vars.city]" objectStore="City_current_weather_data_Object_store">
+				</os:store>
+			</otherwise>
+		</choice>
+		<error-handler ref="global-error-handlerError_Handler" />
+	</flow>
+	
+	
+	
+</mule>
+	
+	
+	
+	
+	

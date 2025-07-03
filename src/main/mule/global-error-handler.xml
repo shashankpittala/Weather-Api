@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="global-error-handlerError_Handler" doc:id="3467d7d5-453b-413a-9ec4-9850e10d72c1" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f3d439b5-a5cf-46dd-ab61-0bcbd6ba03a4" type="HTTP:BAD_GATEWAY, HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY, HTTP:CONNECTIVITY, HTTP:FORBIDDEN, HTTP:INTERNAL_SERVER_ERROR, HTTP:METHOD_NOT_ALLOWED, HTTP:NOT_ACCEPTABLE, HTTP:NOT_FOUND, HTTP:PARSING, HTTP:RETRY_EXHAUSTED, HTTP:SECURITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS, HTTP:UNAUTHORIZED, HTTP:UNSUPPORTED_MEDIA_TYPE">
+			<ee:transform doc:name="Error Response" doc:id="e8785fbd-02c9-4154-ba54-a34e16107549">
+				<ee:message>
+					<ee:set-payload resource="dwl/error_response_payload.dwl" />
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="914fe194-8ccd-46b9-bb94-19c3bbeb9ebf" >
+			<ee:transform doc:name="Error Response" doc:id="3e9093a9-136f-4ca3-bb0f-0392b46f6845">
+				<ee:message>
+					<ee:set-payload resource="dwl/error_response_payload.dwl" />
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+	</error-handler>
+</mule>
